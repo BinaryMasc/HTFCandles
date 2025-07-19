@@ -15,6 +15,9 @@ public class HTFCandles : Indicator
     private Color bullishColor = ColorTranslator.FromHtml("#1f865e");
     private Color bearishColor = ColorTranslator.FromHtml("#b25432");
 
+    private bool showFiboLevels = true;
+    private Color fiboLevelsColor = Color.LightBlue;
+
     private int candlesCount = 1;
     private int indicator_offset = 100;
 
@@ -51,6 +54,18 @@ public class HTFCandles : Indicator
                 Minimum = 0
             });
 
+            settings.Add(new SettingItemBoolean("showFiboLevels", showFiboLevels)
+            {
+                Text = "Show Fibo Levels",
+                SortIndex = 4,
+            });
+
+            settings.Add(new SettingItemColor("fiboLevelsColor", fiboLevelsColor)
+            {
+                Text = "Fibo Levels Color",
+                SortIndex = 5,
+            });
+
             settings.Add(new SettingItemInteger("indicator_offset", indicator_offset)
             {
                 Text = "X Axis Offset",
@@ -68,6 +83,8 @@ public class HTFCandles : Indicator
             if (value.TryGetValue<Color>("bearishColor", out var value3)) bearishColor = value3;
             if (value.TryGetValue<int>("candlesCount", out var value4)) candlesCount = value4;
             if (value.TryGetValue<int>("indicator_offset", out var value5)) indicator_offset = value5;
+            if (value.TryGetValue<bool>("showFiboLevels", out var value6)) showFiboLevels = value6;
+            if (value.TryGetValue<Color>("fiboLevelsColor", out var value7)) fiboLevelsColor = value7;
 
 
             OnSettingsUpdated();
@@ -157,6 +174,26 @@ public class HTFCandles : Indicator
         // High and low
         args.Graphics.FillPolygon(brush, new PointF(candleX + 10, coordYHigh), new PointF(candleX + 10, coordYLow), new PointF(candleX + 11, coordYLow), new PointF(candleX + 11, coordYHigh));
 
+        if (showFiboLevels)
+        {
+            var pen = new Pen(fiboLevelsColor);
+            var fibo618 = (candle.High - candle.Low) * 0.618 + candle.Low;
+            var fibo50 = (candle.High - candle.Low) * 0.5 + candle.Low;
+            var fibo382 = (candle.High - candle.Low) * 0.382 + candle.Low;
+
+            //args.Graphics.DrawString(fibo618.ToString(), font, brush, 100, 100);
+
+            var fibo618CoordY = (float)chartWindow.CoordinatesConverter.GetChartY(fibo618);
+            args.Graphics.DrawLine(pen, new PointF(candleX + 10, fibo618CoordY), new PointF(candleX+20, fibo618CoordY));
+
+            var fibo50CoordY = (float)chartWindow.CoordinatesConverter.GetChartY(fibo50);
+            args.Graphics.DrawLine(pen, new PointF(candleX + 10, fibo50CoordY), new PointF(candleX+20, fibo50CoordY));
+
+            var fibo382CoordY = (float)chartWindow.CoordinatesConverter.GetChartY(fibo382);
+            args.Graphics.DrawLine(pen, new PointF(candleX + 10, fibo382CoordY), new PointF(candleX+20, fibo382CoordY));
+
+            //args.Graphics.FillPolygon(brush, new PointF(candleX + 5, (float)chartWindow.CoordinatesConverter.GetChartY(fibo618)), new PointF(candleX + 100, (float)chartWindow.CoordinatesConverter.GetChartY(fibo618)));
+        }
 
     }
 
